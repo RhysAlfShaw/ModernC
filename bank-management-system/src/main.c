@@ -191,7 +191,37 @@ void transfer_funds(database *db, int from_account, int to_account, float amount
     printf("Transferred %.2f from account %d to account %d successfully.\n", amount, from_account, to_account);
 }
 
-int main() {
+void transfer_funds_process(database *db) {
+    int from_account, to_account;
+    float amount;
+    
+    printf("Enter from account number: ");
+    scanf("%d", &from_account);
+    // password validation here!
+    printf("Enter to account number: ");
+    scanf("%d", &to_account);
+    printf("Enter amount to transfer: ");
+    scanf("%f", &amount);
+    getchar(); // Consume leftover newline
+
+    transfer_funds(db, from_account, to_account, amount);
+}
+void check_account_balance_process(database *db) {
+    int account_number;
+    printf("Enter account number to check balance: ");
+    scanf("%d", &account_number);
+    getchar(); // Consume leftover newline
+
+    check_account_balance(*db, account_number);
+}
+
+void create_new_account_process(database *db) {
+    create_new_record(db);
+}
+
+
+int main(int argc, char *argv[]) {
+
     char *filename = "database.bin";
     srand(time(NULL));
     database db;
@@ -204,14 +234,25 @@ int main() {
         printf("Database file '%s' not found. Creating new database...\n", filename);
         db = create_database(filename);
     }
-    print_database(db);
-    // create_new_record(&db);
-    save_database(db, filename);
-    check_account_balance(db, 2058273749); // Example account number to check
-    transfer_funds(&db, db.records[0].account_number, db.records[1].account_number, 100.0); // Example transfer
-    save_database(db, filename);
-    print_database(db);
-    // print_database(db);
+    // these will be calles as ./bank-management-system <option>
+    if (argc < 2) {
+        printf("No option provided. Exiting.\n");
+        return 0;
+    }
+    char *option = argv[1];
+    if (strcmp(option, "transfer") == 0) {
+        transfer_funds_process(&db);
+        save_database(db, filename);
+    } else if (strcmp(option, "balance") == 0) {
+        check_account_balance_process(&db);
 
+    } else if (strcmp(option, "make-account") == 0) {
+        create_new_account_process(&db);
+        save_database(db, filename);
+    } else {
+        printf("Invalid option: %s\n", option);
+        printf("Valid options: transfer, balance, make-account\n");
+        return 1;
+    }
     return 0;
 }
