@@ -1,4 +1,4 @@
 *.pyc
-*bin/
+*bin
 __pycache__/
 *vscode/
